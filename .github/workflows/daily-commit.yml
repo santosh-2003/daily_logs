@@ -11,13 +11,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Touch a file
-        run: echo "$(date -u)" > activity.log
+      - name: Toggle activity file
+        run: |
+          if [ -f activity.log ]; then
+            echo "Deleting activity.log"
+            rm activity.log
+          else
+            echo "Creating activity.log"
+            echo "$(date -u)" > activity.log
+          fi
 
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add activity.log
-          git commit -m "chore: daily update" || echo "Nothing to commit"
+
+          git add -A
+
+          git commit -m "chore: daily contribution $(date +'%Y-%m-%d')" || exit 0
+
           git push
